@@ -5,10 +5,38 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI AWS API is running!"}
+    return {"message": "AWS Docker Dashboard API is running!!!"}
 
 @app.get("/s3")
-def list_buckets():
+def list_s3_buckets():
     s3 = boto3.client("s3")
     buckets = s3.list_buckets()
-    return {"buckets": [b["Name"] for b in buckets["Buckets"]]}
+    return {"buckets": [b["Name"] for b in buckets.get("Buckets", [])]}
+
+@app.get("/vpcs")
+def list_vpcs():
+    ec2 = boto3.client("ec2")
+    response = ec2.describe_vpcs()
+    vpcs = response.get("Vpcs", [])
+    return {"vpcs": [{"VpcId": vpc["VpcId"], "CidrBlock": vpc["CidrBlock"]} for vpc in vpcs]}
+
+@app.get("/ec2")
+def list_ec2_instances():
+    ec2 = boto3.client("ec2")
+    reservations = ec2.describe_instances().get("Reservations", [])
+    instances = [
+        {
+            "InstanceId": i["InstanceId"],
+            "State": i["State"]["Name"],
+            "InstanceType": i["InstanceType"],
+            "PublicIpAddress": i.get("PublicIpAddress")
+        }
+        for r in reservations for i in r["Instances"]
+    ]
+    return {"instances": instances}
+
+@app.get("/certs")
+def list_certificates():
+    acm = boto3.client("acm")
+    certs = acm.list_certificates().get("CertificateSummaryList", [])
+    return {"certificates": [{"DomainName": c["DomainName"], "CertificateArn": c["CertificateArn"]} for c in certs]}

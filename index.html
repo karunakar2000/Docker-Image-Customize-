@@ -1,26 +1,156 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>FastAPI Frontend</title>
+  <title>AWS Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Hello from FastAPI Frontend</h1>
-    <button onclick="getEC2Info()">Get EC2 Info</button>
 
-    <div id="result"></div>
+  <h1>Hello from FastAPI Frontend</h1>
 
-    <script>
-        async function getEC2Info() {
-            try {
-                const response = await fetch('/ec2');
-                const data = await response.json();
-                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById('result').innerText = 'Error fetching EC2 info';
-                console.error(error);
-            }
-        }
-    </script>
+  <div class="section">
+    <button onclick="getEC2()">Get EC2 Info</button>
+    <table id="ec2Table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Instance ID</th>
+          <th>State</th>
+          <th>Type</th>
+          <th>Public IP</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <button onclick="getS3()">Get S3 Buckets</button>
+    <table id="s3Table" style="display:none;">
+      <thead>
+        <tr><th>Bucket Name</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <button onclick="getVPCs()">Get VPCs</button>
+    <table id="vpcsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>VPC ID</th>
+          <th>CIDR Block</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <button onclick="getCerts()">Get SSL Certificates</button>
+    <table id="certsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Domain Name</th>
+          <th>Certificate ARN</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function getEC2() {
+      const res = await fetch("/ec2");
+      const data = await res.json();
+      const table = document.getElementById("ec2Table");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      data.instances.forEach(inst => {
+        const row = `<tr>
+          <td>${inst.InstanceId}</td>
+          <td>${inst.State}</td>
+          <td>${inst.InstanceType}</td>
+          <td>${inst.PublicIpAddress || 'N/A'}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+      table.style.display = "table";
+    }
+
+    async function getS3() {
+      const res = await fetch("/s3");
+      const data = await res.json();
+      const table = document.getElementById("s3Table");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      data.buckets.forEach(bucket => {
+        tbody.innerHTML += `<tr><td>${bucket}</td></tr>`;
+      });
+      table.style.display = "table";
+    }
+
+    async function getVPCs() {
+      const res = await fetch("/vpcs");
+      const data = await res.json();
+      const table = document.getElementById("vpcsTable");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      data.vpcs.forEach(vpc => {
+        tbody.innerHTML += `<tr><td>${vpc.VpcId}</td><td>${vpc.CidrBlock}</td></tr>`;
+      });
+      table.style.display = "table";
+    }
+
+    async function getCerts() {
+      const res = await fetch("/certs");
+      const data = await res.json();
+      const table = document.getElementById("certsTable");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      data.certificates.forEach(cert => {
+        tbody.innerHTML += `<tr><td>${cert.DomainName}</td><td>${cert.CertificateArn}</td></tr>`;
+      });
+      table.style.display = "table";
+    }
+  </script>
+
 </body>
 </html>
-

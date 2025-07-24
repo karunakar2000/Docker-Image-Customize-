@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My FastAPI App</title>
+    <title>FastAPI Frontend</title>
 </head>
 <body>
-  <h1>Hello from FastAPI Frontend</h1>
-  <button onclick="fetchData()">Get EC2 Info</button>
-  <pre id="output"></pre>
+    <h1>Hello from FastAPI Frontend</h1>
+    <button onclick="getEC2Info()">Get EC2 Info</button>
 
-  <script src="/static/index.js"></script>
+    <div id="result"></div>
+
+    <script>
+        async function getEC2Info() {
+            try {
+                const response = await fetch('/ec2');
+                const data = await response.json();
+                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('result').innerText = 'Error fetching EC2 info';
+                console.error(error);
+            }
+        }
+    </script>
 </body>
 </html>
+

@@ -15,14 +15,14 @@ def list_s3_buckets():
 
 @app.get("/vpcs")
 def list_vpcs():
-    ec2 = boto3.client("ec2")
+    ec2 = boto3.client("ec2", region_name="us-east-1")
     response = ec2.describe_vpcs()
     vpcs = response.get("Vpcs", [])
     return {"vpcs": [{"VpcId": vpc["VpcId"], "CidrBlock": vpc["CidrBlock"]} for vpc in vpcs]}
 
 @app.get("/ec2")
 def list_ec2_instances():
-    ec2 = boto3.client("ec2")
+    ec2 = boto3.client("ec2", region_name="us-east-1")
     reservations = ec2.describe_instances().get("Reservations", [])
     instances = [
         {
@@ -37,6 +37,6 @@ def list_ec2_instances():
 
 @app.get("/certs")
 def list_certificates():
-    acm = boto3.client("acm")
+    acm = boto3.client("acm", region_name="us-east-1")
     certs = acm.list_certificates().get("CertificateSummaryList", [])
     return {"certificates": [{"DomainName": c["DomainName"], "CertificateArn": c["CertificateArn"]} for c in certs]}

@@ -2,6 +2,12 @@ from fastapi import FastAPI
 import boto3
 
 app = FastAPI()
+from fastapi.responses import FileResponse
+
+# Serve index.html at root URL
+@app.get("/")
+def root():
+    return FileResponse("index.html")
 
 @app.get("/")
 def root():
